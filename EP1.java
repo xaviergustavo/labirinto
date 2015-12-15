@@ -153,7 +153,8 @@ class Labirinto {
 
 		caminhoRec(this.partida, new ArrayList<Coordenada>());
 
-		// Se nao exist
+		// Se nao existir nenhum caminho valido,
+		// retorna uma lista vazia.
 		if(this.caminhos.size() == 0) {
 			return null;
 		}
