@@ -24,31 +24,31 @@ class Coordenada implements Comparable<Coordenada> {
 	public int getY() {
 		return y;
 	}
-	
+
 	public int getValor() {
 		return valor;
 	}
-	
+
 	@Override
 	public int compareTo(Coordenada c) {
 		return Integer.compare(this.valor, c.valor);
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.valueOf(x) + " " + String.valueOf(y);
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (!(obj instanceof Coordenada)) return false;
 		if (obj == null) return false;
 		if (obj == this) return true;
-		
+
 		Coordenada nova = (Coordenada)obj;
-		
+
 		if (this.x == nova.x && this.y == nova.y) return true;
-		
+
 		return false;
 	}
 
@@ -67,7 +67,7 @@ class Labirinto {
 		this.partida = partida;
 		this.destino = destino;
 		this.caminho = new ArrayList<Coordenada>();
-		
+
 	}
 
 	public boolean verifica(int i, int j) {
@@ -81,60 +81,60 @@ class Labirinto {
 		return false;
 
 	}
-	
+
 	public int totalCaminhoRec(Coordenada atual, int soma) {
-		
+
 		int i = atual.getX();
 		int j = atual.getY();
-		
+
 		if(verifica(i, j)) {
-			
+
 			if(atual.equals(this.destino)) return soma;
-			
+
 			soma += labirinto[i][j];
-			
+
 			labirinto[i][j] = -1;
-			
+
 			int direita = totalCaminhoRec(new Coordenada(i, j+1, 0), soma);
 			int baixo = totalCaminhoRec(new Coordenada(i+1, j, 0), soma);
 			int esquerda = totalCaminhoRec(new Coordenada(i, j-1, 0), soma);
 			int cima = totalCaminhoRec(new Coordenada(i-1, j, 0), soma);
-			
+
 			List<Coordenada> valores = new ArrayList<Coordenada>();
-			
+
 			valores.add(new Coordenada(i, j+1, direita));
 			valores.add(new Coordenada(i+1, j, baixo));
 			valores.add(new Coordenada(i, j-1, esquerda));
 			valores.add(new Coordenada(i-1, j, cima));
-			
+
 			Collections.sort(valores);
-			
+
 			Coordenada melhor = valores.get(valores.size() - 1);
-			
+
 			this.caminho.add(melhor);
-			
+
 			return melhor.getValor();
-			
+
 		}
-		
+
 		return -1;
-		
+
 	}
-	
+
 	public int totalCaminho() {
-		
+
 		int total = totalCaminhoRec(this.partida, 0);
-		
+
 		this.caminho.add(partida);
-		
+
 		Collections.reverse(this.caminho);
-		
+
 		return total;
-		
+
 	}
-	
+
 	public void resultado() {
-		
+
 	}
 
 	public int[][] getLabirinto() {
@@ -148,7 +148,7 @@ class Labirinto {
 	public Coordenada getDestino() {
 		return this.destino;
 	}
-	
+
 	public List<Coordenada> getCaminho() {
 		return this.caminho;
 	}
@@ -189,13 +189,13 @@ public class EP1 {
 			char[] chars = arquivo.get(i + 1).toCharArray();
 			for(int j = 0; j < chars.length; j++) {
 				switch (chars[j]) {
-					case 'X':
+				case 'X':
 					labirinto[i][j] = -1;
 					break;
-					case '.':
+				case '.':
 					labirinto[i][j] = 0;
 					break;
-					default:
+				default:
 					labirinto[i][j] = Integer.parseInt(Character.toString(chars[j]));
 				}
 			}
@@ -219,13 +219,13 @@ public class EP1 {
 	public static void main(String[] args) {
 		
 		Labirinto l = lerArquivo(args[0]);
-		
+
 		int total = l.totalCaminho();
-		
+
 		List<Coordenada> caminho = l.getCaminho();
-		
+
 		System.out.printf("%d %d\n", caminho.size(), total);
-		
+
 		for(int i = 0; i < caminho.size(); i++) {
 			System.out.println(caminho.get(i).toString());
 		}
