@@ -2,16 +2,19 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.io.IOException;
 
-class Coordenada {
+class Coordenada implements Comparable<Coordenada> {
 
-	private int x;
+    private int x;
 	private int y;
+    private int valor;
 
-	public Coordenada(int x, int y) {
+	public Coordenada(int x, int y, int valor) {
 		this.x = x;
 		this.y = y;
+        this.valor = valor;
 	}
 
 	public int getX() {
@@ -21,69 +24,134 @@ class Coordenada {
 	public int getY() {
 		return y;
 	}
+    
+    public int getValor() {
+        return valor;
+    }
+    
+    @Override
+    public int compareTo(Coordenada c) {
+        return Integer.compare(this.valor, c.valor);
+    }
+    
+    @Override
+    public String toString() {
+        return String.valueOf(x) + " " + String.valueOf(y);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Coordenada)) return false;
+        if (obj == null) return false;
+        if (obj == this) return true;
+        
+        Coordenada nova = (Coordenada)obj;
+        
+        if (this.x == nova.x && this.y == nova.y) return true;
+        
+        return false;
+    }
 
 }
 
 class Labirinto {
 
 	private int[][] labirinto;
-
 	private Coordenada partida;
-
 	private Coordenada destino;
+    private List<Coordenada> caminho;
 
 	public Labirinto(int[][] labirinto, Coordenada partida, Coordenada destino) {
 		
 		this.labirinto = labirinto;
-		
 		this.partida = partida;
-		
 		this.destino = destino;
+        this.caminho = new ArrayList<Coordenada>();
 	
-	}
-
-	public void imprimeLabirinto() {
-		
-		for(int i = 0; i < labirinto.length; i++) {
-			for(int j = 0; j < labirinto[i].length; j++) {
-				System.out.printf("%d\t", labirinto[i][j]);
-			}
-			System.out.println();
-		}
-
 	}
 
 	public boolean verifica(int i, int j) {
 
 		try {
-			
 			if(labirinto[i][j] >= 0) return true;
-		
-		} catch (Exception e) {
-
+		} 
+		catch (Exception e) {
 		}
 
 		return false;
 
 	}
+    
+    public int totalCaminhoRec(Coordenada atual, int soma) {
+        
+        int i = atual.getX();
+        int j = atual.getY();
+        
+        if(verifica(i, j)) {
+            
+            if(atual.equals(this.destino)) return soma;
+            
+            soma += labirinto[i][j];
+            
+            labirinto[i][j] = -1;
+            
+            int direita = totalCaminhoRec(new Coordenada(i, j+1, 0), soma);
+            int baixo = totalCaminhoRec(new Coordenada(i+1, j, 0), soma);
+            int esquerda = totalCaminhoRec(new Coordenada(i, j-1, 0), soma);
+            int cima = totalCaminhoRec(new Coordenada(i-1, j, 0), soma);
+            
+            List<Coordenada> valores = new ArrayList<Coordenada>();
+            
+            valores.add(new Coordenada(i, j+1, direita));
+            valores.add(new Coordenada(i+1, j, baixo));
+            valores.add(new Coordenada(i, j-1, esquerda));
+            valores.add(new Coordenada(i-1, j, cima));
+            
+            Collections.sort(valores);
+            
+            Coordenada melhor = valores.get(valores.size() - 1);
+            
+            this.caminho.add(melhor);
+            
+            return melhor.getValor();
+            
+        }
+        
+        return -1;
+        
+    }
+    
+    public int totalCaminho() {
+        
+        int total = totalCaminhoRec(this.partida, 0);
+        
+        this.caminho.add(partida);
+        
+        Collections.reverse(this.caminho);
+        
+        return total;
+        
+    }
+    
+    public void resultado() {
+        
+    }
 
 	public int[][] getLabirinto() {
-
-		return labirinto;
-
+		return this.labirinto;
 	}
 
 	public Coordenada getPartida() {
-		
-		return partida;
-	
+		return this.partida;
 	}
 
 	public Coordenada getDestino() {
-		
-		return destino;
-	
+		return this.destino;
 	}
+    
+    public List<Coordenada> getCaminho() {
+        return this.caminho;
+    }
 
 }
 
@@ -110,17 +178,17 @@ public class EP1 {
 			}
 		}
 
-		String[] primeiraLinha = arquivo.get(0).split(" ");
+		String[] linha = arquivo.get(0).split(" ");
 
-		int linhas = Integer.parseInt(primeiraLinha[0]);
-		int colunas = Integer.parseInt(primeiraLinha[1]);
+		int linhas = Integer.parseInt(linha[0]);
+		int colunas = Integer.parseInt(linha[1]);
 
 		int[][] labirinto = new int[linhas][colunas];
 
 		for(int i = 0; i < arquivo.size() - 3; i++) {
-			char[] linha = arquivo.get(i+1).toCharArray();
-			for(int j = 0; j < linha.length; j++) {
-				switch (linha[j]) {
+			char[] chars = arquivo.get(i + 1).toCharArray();
+			for(int j = 0; j < chars.length; j++) {
+				switch (chars[j]) {
 					case 'X':
 						labirinto[i][j] = -1;
 						break;
@@ -128,31 +196,39 @@ public class EP1 {
 						labirinto[i][j] = 0;
 						break;
 					default:
-						labirinto[i][j] = Integer.parseInt(Character.toString(linha[j]));
+						labirinto[i][j] = Integer.parseInt(Character.toString(chars[j]));
 				}
 			}
 		}
 
-		String[] penultimaLinha = arquivo.get(arquivo.size() - 2).split(" ");
-		int partidaLinha = Integer.parseInt(penultimaLinha[0]);
-		int partidaColuna = Integer.parseInt(penultimaLinha[1]);
+		linha = arquivo.get(arquivo.size() - 2).split(" ");
+		int partidaLinha = Integer.parseInt(linha[0]);
+		int partidaColuna = Integer.parseInt(linha[1]);
 
-		Coordenada partida = new Coordenada(partidaLinha, partidaColuna);
+		Coordenada partida = new Coordenada(partidaLinha, partidaColuna, 0);
 
-		String[] ultimaLinha = arquivo.get(arquivo.size() - 1).split(" ");
-		int destinoLinha = Integer.parseInt(ultimaLinha[0]);
-		int destinoColuna = Integer.parseInt(ultimaLinha[1]);
+		linha = arquivo.get(arquivo.size() - 1).split(" ");
+		int destinoLinha = Integer.parseInt(linha[0]);
+		int destinoColuna = Integer.parseInt(linha[1]);
 
-		Coordenada destino = new Coordenada(destinoLinha, destinoColuna);
+		Coordenada destino = new Coordenada(destinoLinha, destinoColuna, 0);
 
 		return new Labirinto(labirinto, partida, destino);
 	}
 	
 	public static void main(String[] args) {
 		
-		Labirinto l = lerArquivo("labirinto.txt");
-
-		l.imprimeLabirinto();
+		Labirinto l = lerArquivo(args[0]);
+        
+        int total = l.totalCaminho();
+        
+        List<Coordenada> caminho = l.getCaminho();
+        
+        System.out.printf("%d %d\n", caminho.size(), total);
+        
+        for(int i = 0; i < caminho.size(); i++) {
+            System.out.println(caminho.get(i).toString());
+        }
 	}
 
 }
