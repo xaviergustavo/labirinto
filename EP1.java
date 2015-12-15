@@ -95,17 +95,17 @@ class Labirinto {
 
 			labirinto[i][j] = -1;
 
-			int direita = totalCaminhoRec(new Coordenada(i, j+1, 0), soma);
+			int cima = totalCaminhoRec(new Coordenada(i-1, j, 0), soma);
 			int baixo = totalCaminhoRec(new Coordenada(i+1, j, 0), soma);
 			int esquerda = totalCaminhoRec(new Coordenada(i, j-1, 0), soma);
-			int cima = totalCaminhoRec(new Coordenada(i-1, j, 0), soma);
+			int direita = totalCaminhoRec(new Coordenada(i, j+1, 0), soma);
 
 			List<Coordenada> valores = new ArrayList<Coordenada>();
 
-			valores.add(new Coordenada(i, j+1, direita));
-			valores.add(new Coordenada(i+1, j, baixo));
-			valores.add(new Coordenada(i, j-1, esquerda));
-			valores.add(new Coordenada(i-1, j, cima));
+			if(cima >= 0) valores.add(new Coordenada(i-1, j, cima));
+			if(baixo >= 0) valores.add(new Coordenada(i+1, j, baixo));
+			if(esquerda >= 0) valores.add(new Coordenada(i, j-1, esquerda));
+			if(direita >= 0) valores.add(new Coordenada(i, j+1, direita));
 
 			Collections.sort(valores);
 
@@ -121,19 +121,18 @@ class Labirinto {
 
 	}
 
-	public int totalCaminho() {
+	public void caminho() {
 
 		int total = totalCaminhoRec(this.partida, 0);
 
 		this.caminho.add(partida);
-
 		Collections.reverse(this.caminho);
 
-		return total;
+		System.out.printf("%d %d\n", caminho.size(), total);
 
-	}
-
-	public void resultado() {
+		for(int i = 0; i < caminho.size(); i++) {
+			System.out.println(caminho.get(i).toString());
+		}
 
 	}
 
@@ -168,12 +167,15 @@ public class EP1 {
 			while((linhaAtual = br.readLine()) != null) {
 				arquivo.add(linhaAtual);
 			}
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
-		} finally {
+		}
+		finally {
 			try {
 				if (br != null) br.close();
-			} catch (IOException ex) {
+			} 
+			catch (IOException ex) {
 				ex.printStackTrace();
 			}
 		}
@@ -220,15 +222,7 @@ public class EP1 {
 		
 		Labirinto l = lerArquivo(args[0]);
 
-		int total = l.totalCaminho();
-
-		List<Coordenada> caminho = l.getCaminho();
-
-		System.out.printf("%d %d\n", caminho.size(), total);
-
-		for(int i = 0; i < caminho.size(); i++) {
-			System.out.println(caminho.get(i).toString());
-		}
+		l.caminho();
 	}
 
 }
