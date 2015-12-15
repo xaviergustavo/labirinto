@@ -292,6 +292,12 @@ public class EP1 {
 	
 	public static void main(String[] args) {
 		
+		if(args.length != 1) {
+			System.out.println("Uso:");
+			System.out.println("\tjava EP1 <entrada.txt>");
+			return;
+		}
+
 		Labirinto l = lerArquivo(args[0]);
 
 		l.resultado();
